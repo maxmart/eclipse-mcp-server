@@ -1,0 +1,4 @@
+plugin/bin/
+bridge/out/
+*.class
+*.jar

@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Eclipse MCP Server
+Bundle-SymbolicName: eclipse.mcp.server;singleton:=true
+Bundle-Version: 0.2.0.qualifier
+Bundle-Activator: eclipse.mcp.Activator
+Bundle-Vendor: Eclipse MCP
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ org.eclipse.debug.core,
+ org.eclipse.debug.ui,
+ org.eclipse.ui,
+ org.eclipse.ui.console,
+ com.google.gson
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-ActivationPolicy: lazy
