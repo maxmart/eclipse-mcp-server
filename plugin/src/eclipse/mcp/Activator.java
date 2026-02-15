@@ -7,7 +7,7 @@ public class Activator extends AbstractUIPlugin {
 
     public static final String PLUGIN_ID = "eclipse.mcp.server";
     private static Activator instance;
-    private McpTcpServer tcpServer;
+    private McpHttpServer httpServer;
 
     @Override
     public void start(BundleContext context) throws Exception {
@@ -23,17 +23,22 @@ public class Activator extends AbstractUIPlugin {
     }
 
     public void startServer() {
-        if (tcpServer == null) {
-            tcpServer = new McpTcpServer();
-            tcpServer.start();
-            getLog().info("MCP TCP server started on port " + McpTcpServer.PORT);
+        if (httpServer == null) {
+            httpServer = new McpHttpServer();
+            try {
+                httpServer.start();
+                getLog().info("MCP HTTP server started on port " + McpHttpServer.PORT);
+            } catch (Exception e) {
+                getLog().error("Failed to start MCP HTTP server", e);
+                httpServer = null;
+            }
         }
     }
 
     public void stopServer() {
-        if (tcpServer != null) {
-            tcpServer.shutdown();
-            tcpServer = null;
+        if (httpServer != null) {
+            httpServer.shutdown();
+            httpServer = null;
         }
     }
 

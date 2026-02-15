@@ -1,8 +1,7 @@
 {
   "mcpServers": {
     "eclipse": {
-      "command": "java",
-      "args": ["-cp", "C:\\Users\\max\\workspace\\eclipse-mcp-server\\bridge\\out", "eclipse.mcp.bridge.StdioBridge"]
+      "url": "http://localhost:5188/mcp"
     }
   }
 }

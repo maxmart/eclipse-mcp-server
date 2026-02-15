@@ -5,13 +5,10 @@ An Eclipse IDE plugin that lets [Claude Code](https://claude.ai/code) control yo
 ## How it works
 
 ```
-Claude Code (stdio) → StdioBridge (bridge/) → TCP :5188 → Eclipse Plugin (plugin/)
+Claude Code → HTTP POST /mcp → Eclipse Plugin (port 5188)
 ```
 
-Two Java components:
-
-- **`bridge/`** — Lightweight stdin/stdout-to-TCP pipe. This is what Claude Code spawns. No Eclipse dependencies.
-- **`plugin/`** — Eclipse OSGi plugin that accepts TCP connections and dispatches tool calls to Eclipse Platform APIs.
+The plugin runs an HTTP server inside Eclipse. Claude Code connects directly via HTTP — no bridge, no intermediate process.
 
 ## Available tools
 
@@ -34,14 +31,7 @@ Two Java components:
 - Eclipse IDE (2023-06 or later)
 - Java 17+
 
-### 1. Build the bridge
-
-```
-cd bridge
-build-bridge.bat
-```
-
-### 2. Install the plugin
+### 1. Install the plugin
 
 Open the `plugin/` folder as an Eclipse project so Eclipse compiles it, then:
 
@@ -52,22 +42,31 @@ build-plugin.bat
 
 This creates the plugin JAR and copies it to your Eclipse `dropins/` directory. Restart Eclipse.
 
-### 3. Configure Claude Code
+### 2. Configure Claude Code
 
-Add a `.mcp.json` to your project root (or `~/.claude/mcp.json` for global config):
+```
+claude mcp add eclipse --transport http http://localhost:5188/mcp
+```
+
+Or add a `.mcp.json` to your project root (or `~/.claude/mcp.json` for global config):
 
 ```json
 {
   "mcpServers": {
     "eclipse": {
-      "command": "java",
-      "args": ["-cp", "/path/to/eclipse-mcp-server/bridge/out", "eclipse.mcp.bridge.StdioBridge"]
+      "url": "http://localhost:5188/mcp"
     }
   }
 }
 ```
 
-Replace `/path/to/eclipse-mcp-server` with the actual path on your machine.
+### 3. Verify
+
+```
+curl -X POST http://localhost:5188/mcp -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","id":1,"method":"ping"}'
+```
+
+You should get back `{"jsonrpc":"2.0","id":1,"result":{}}`.
 
 ## Adding custom tools
 

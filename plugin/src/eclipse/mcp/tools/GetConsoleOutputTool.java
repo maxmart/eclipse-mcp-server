@@ -83,21 +83,25 @@ public class GetConsoleOutputTool implements IMcpTool {
         // When that happens, getContents() returns empty. Read from the Console
         // document instead (the same text the user sees in the Console view).
         if (stdout.length() == 0 && stderr.length() == 0) {
-            IConsoleManager consoleMgr = ConsolePlugin.getDefault().getConsoleManager();
-            for (org.eclipse.ui.console.IConsole console : consoleMgr.getConsoles()) {
-                if (console instanceof org.eclipse.debug.ui.console.IConsole
-                        && console instanceof TextConsole) {
-                    IProcess consoleProcess =
-                            ((org.eclipse.debug.ui.console.IConsole) console).getProcess();
-                    for (IProcess targetProcess : target.getProcesses()) {
-                        if (consoleProcess.equals(targetProcess)) {
-                            String text = ((TextConsole) console).getDocument().get();
-                            if (text != null && !text.isEmpty()) {
-                                stdout.append(text);
+            try {
+                IConsoleManager consoleMgr = ConsolePlugin.getDefault().getConsoleManager();
+                for (org.eclipse.ui.console.IConsole console : consoleMgr.getConsoles()) {
+                    if (console instanceof org.eclipse.debug.ui.console.IConsole
+                            && console instanceof TextConsole) {
+                        IProcess consoleProcess =
+                                ((org.eclipse.debug.ui.console.IConsole) console).getProcess();
+                        for (IProcess targetProcess : target.getProcesses()) {
+                            if (consoleProcess.equals(targetProcess)) {
+                                String text = ((TextConsole) console).getDocument().get();
+                                if (text != null && !text.isEmpty()) {
+                                    stdout.append(text);
+                                }
                             }
                         }
                     }
                 }
+            } catch (Throwable e) {
+                // Fallback may not be available in all Eclipse configurations
             }
         }
 

@@ -4,15 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Eclipse MCP Server — an Eclipse IDE plugin that exposes Eclipse workspace operations (projects, builds, launches) to Claude Code via the Model Context Protocol (MCP). Communication uses JSON-RPC 2.0 over TCP (port 5188), with a stdio-to-TCP bridge for Claude Code integration.
+Eclipse MCP Server — an Eclipse IDE plugin that exposes Eclipse workspace operations (projects, builds, launches) to Claude Code via the Model Context Protocol (MCP). Communication uses JSON-RPC 2.0 over HTTP (port 5188).
 
 ## Build Commands
-
-**Bridge** (stdio-to-TCP adapter):
-```
-cd bridge && build-bridge.bat
-```
-Compiles `StdioBridge.java` and produces `eclipse-mcp-bridge.jar`.
 
 **Plugin** (Eclipse IDE plugin):
 ```
@@ -25,22 +19,18 @@ There are no automated tests, linting, or formatting tools configured.
 ## Architecture
 
 ```
-Claude Code (stdio)  →  StdioBridge (bridge/)  →  TCP :5188  →  McpTcpServer (plugin/)
-                                                                       ↓
-                                                              McpClientHandler (per connection)
-                                                                       ↓
-                                                              McpProtocolHandler (JSON-RPC dispatch)
-                                                                       ↓
-                                                              ToolRegistry → IMcpTool implementations
-                                                                       ↓
-                                                              Eclipse Platform APIs
+Claude Code → HTTP POST /mcp → McpHttpServer (plugin/, port 5188)
+                                       ↓
+                              McpProtocolHandler (JSON-RPC dispatch)
+                                       ↓
+                              ToolRegistry → IMcpTool implementations
+                                       ↓
+                              Eclipse Platform APIs
 ```
 
-**Two separate Java components:**
+**Single component:** `plugin/` — Eclipse OSGi plugin (requires JavaSE-17). Auto-starts via `StartupHook` (registered as `org.eclipse.ui.startup` extension). The `Activator` manages the HTTP server lifecycle.
 
-- **`bridge/`** — Standalone Java program (no Eclipse dependencies). Reads stdin, forwards to TCP socket at localhost:5188, and pipes responses back to stdout. This is what Claude Code spawns via `.mcp.json`.
-
-- **`plugin/`** — Eclipse OSGi plugin (requires JavaSE-17). Auto-starts via `StartupHook` (registered as `org.eclipse.ui.startup` extension). The `Activator` manages the TCP server lifecycle.
+`McpHttpServer` uses `com.sun.net.httpserver.HttpServer` (built into JDK 17+) with a daemon thread pool. A single shared `McpProtocolHandler` instance handles all requests (it's thread-safe).
 
 ## Key Abstractions
 
@@ -55,11 +45,16 @@ Claude Code (stdio)  →  StdioBridge (bridge/)  →  TCP :5188  →  McpTcpServ
 
 The tool's `getInputSchema()` must return a valid JSON Schema object. The `execute()` method receives the parsed arguments and returns a `JsonObject` result.
 
+## Versioning
+
+- The version is stored in the `VERSION` file at the project root.
+- **Always bump the version when making changes** — update `VERSION`, `META-INF/MANIFEST.MF` (`Bundle-Version`), and the JAR filename in `build-plugin.bat`.
+- Use semantic versioning: patch for bug fixes, minor for new features/tools, major for breaking changes.
+
 ## Important Details
 
-- TCP server binds to `127.0.0.1:5188` (localhost only) — hardcoded in `McpTcpServer.PORT`.
-- Bridge retries connection to the TCP server for up to 30 seconds on startup.
-- Thread-per-client model: each TCP connection gets a daemon thread in `McpClientHandler`.
+- HTTP server binds to `0.0.0.0:5188` — hardcoded in `McpHttpServer.PORT`.
+- Daemon thread pool via `Executors.newCachedThreadPool` — threads are created on demand, reused, and cleaned up after idle.
 - Many tools run Eclipse operations on the UI thread via `Display.getDefault().syncExec()` or use the Eclipse Jobs API for async work (builds, refreshes).
 - The plugin depends on `com.google.gson` for all JSON handling.
 - MCP protocol version: `2024-11-05`.

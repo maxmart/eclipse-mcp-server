@@ -60,7 +60,7 @@ public class McpProtocolHandler {
 
         JsonObject serverInfo = new JsonObject();
         serverInfo.addProperty("name", "eclipse-mcp-server");
-        serverInfo.addProperty("version", "0.2.0");
+        serverInfo.addProperty("version", "0.3.0");
         result.add("serverInfo", serverInfo);
 
         return result;
