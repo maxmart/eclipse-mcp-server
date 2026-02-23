@@ -1,17 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
-cd "$(dirname "$0")"
-
-VERSION=$(<../VERSION)
-JAR_NAME="eclipse.mcp.server_${VERSION}.jar"
 
 # Eclipse plugins directory: argument > env var
+# Resolve to absolute path before cd-ing into plugin/
 PLUGINS="${1:-${ECLIPSE_PLUGINS:-}}"
 if [ -z "$PLUGINS" ]; then
   echo "Usage: build.sh <eclipse-plugins-dir>" >&2
   echo "  or set ECLIPSE_PLUGINS env var" >&2
   exit 1
 fi
+PLUGINS="$(cd "$PLUGINS" && pwd)"
+
+cd "$(dirname "$0")"
+
+VERSION=$(<../VERSION)
+JAR_NAME="eclipse.mcp.server_${VERSION}.jar"
 
 # Resolve dependency JARs using globs (version-independent)
 resolve() {
