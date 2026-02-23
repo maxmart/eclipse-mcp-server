@@ -27,9 +27,9 @@ public class Activator extends AbstractUIPlugin {
             httpServer = new McpHttpServer();
             try {
                 httpServer.start();
-                getLog().info("MCP HTTP server started on port " + McpHttpServer.PORT);
+                getLog().log(new org.eclipse.core.runtime.Status(org.eclipse.core.runtime.IStatus.INFO, PLUGIN_ID, "MCP HTTP server started on port " + McpHttpServer.PORT));
             } catch (Exception e) {
-                getLog().error("Failed to start MCP HTTP server", e);
+                getLog().log(new org.eclipse.core.runtime.Status(org.eclipse.core.runtime.IStatus.ERROR, PLUGIN_ID, "Failed to start MCP HTTP server", e));
                 httpServer = null;
             }
         }

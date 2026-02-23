@@ -15,7 +15,7 @@ public class McpProtocolHandler {
 
     public String handleMessage(String json) {
         try {
-            JsonObject request = JsonParser.parseString(json).getAsJsonObject();
+            JsonObject request = new JsonParser().parse(json).getAsJsonObject();
             String method = request.has("method") ? request.get("method").getAsString() : null;
 
             // Notifications have no id and expect no response
@@ -40,7 +40,7 @@ public class McpProtocolHandler {
             }
         } catch (Exception e) {
             try {
-                JsonObject request = JsonParser.parseString(json).getAsJsonObject();
+                JsonObject request = new JsonParser().parse(json).getAsJsonObject();
                 if (request.has("id")) {
                     return respondError(request.get("id"), -32603, e.getMessage());
                 }
@@ -60,7 +60,7 @@ public class McpProtocolHandler {
 
         JsonObject serverInfo = new JsonObject();
         serverInfo.addProperty("name", "eclipse-mcp-server");
-        serverInfo.addProperty("version", "0.3.0");
+        serverInfo.addProperty("version", "0.3.1");
         result.add("serverInfo", serverInfo);
 
         return result;

@@ -168,7 +168,7 @@ public class RunTool implements IMcpTool {
                     return Status.OK_STATUS;
                 } catch (Exception e) {
                     jobError[0] = e;
-                    return Status.error("Failed: " + e.getMessage(), e);
+                    return new Status(IStatus.ERROR, "eclipse.mcp.server", "Failed: " + e.getMessage(), e);
                 }
             }
         };

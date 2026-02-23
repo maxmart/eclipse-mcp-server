@@ -7,6 +7,8 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.IStreamMonitor;
 import org.eclipse.debug.core.model.IStreamsProxy;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.TextConsole;
@@ -82,27 +84,32 @@ public class GetConsoleOutputTool implements IMcpTool {
         // monitors after attaching its own listener, which clears the buffer.
         // When that happens, getContents() returns empty. Read from the Console
         // document instead (the same text the user sees in the Console view).
+        // This must run on the UI thread since it accesses Console UI components.
         if (stdout.length() == 0 && stderr.length() == 0) {
-            try {
-                IConsoleManager consoleMgr = ConsolePlugin.getDefault().getConsoleManager();
-                for (org.eclipse.ui.console.IConsole console : consoleMgr.getConsoles()) {
-                    if (console instanceof org.eclipse.debug.ui.console.IConsole
-                            && console instanceof TextConsole) {
-                        IProcess consoleProcess =
-                                ((org.eclipse.debug.ui.console.IConsole) console).getProcess();
-                        for (IProcess targetProcess : target.getProcesses()) {
-                            if (consoleProcess.equals(targetProcess)) {
-                                String text = ((TextConsole) console).getDocument().get();
-                                if (text != null && !text.isEmpty()) {
-                                    stdout.append(text);
+            final ILaunch t = target;
+            Display display = PlatformUI.getWorkbench().getDisplay();
+            display.syncExec(() -> {
+                try {
+                    IConsoleManager consoleMgr = ConsolePlugin.getDefault().getConsoleManager();
+                    for (org.eclipse.ui.console.IConsole console : consoleMgr.getConsoles()) {
+                        if (console instanceof org.eclipse.debug.ui.console.IConsole
+                                && console instanceof TextConsole) {
+                            IProcess consoleProcess =
+                                    ((org.eclipse.debug.ui.console.IConsole) console).getProcess();
+                            for (IProcess targetProcess : t.getProcesses()) {
+                                if (consoleProcess.equals(targetProcess)) {
+                                    String text = ((TextConsole) console).getDocument().get();
+                                    if (text != null && !text.isEmpty()) {
+                                        stdout.append(text);
+                                    }
                                 }
                             }
                         }
                     }
+                } catch (Throwable e) {
+                    // Fallback may not be available in all Eclipse configurations
                 }
-            } catch (Throwable e) {
-                // Fallback may not be available in all Eclipse configurations
-            }
+            });
         }
 
         JsonObject result = new JsonObject();
