@@ -2,6 +2,7 @@ package eclipse.mcp.tools;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import org.eclipse.core.runtime.Platform;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -17,6 +18,11 @@ public class ToolRegistry {
         register(new LaunchTool());
         register(new TerminateTool());
         register(new RefreshProjectTool());
+        // gradle_refresh needs Buildship (an optional dependency) — only offer it when that bundle is installed,
+        // otherwise the whole server would fail to load on an Eclipse without Gradle tooling.
+        if (Platform.getBundle("org.eclipse.buildship.core") != null) {
+            register(new GradleRefreshTool());
+        }
         register(new BuildProjectTool());
         register(new GetConsoleOutputTool());
         register(new RunTool());
