@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Eclipse MCP Server
 Bundle-SymbolicName: eclipse.mcp.server;singleton:=true
-Bundle-Version: 0.3.1.qualifier
+Bundle-Version: 0.4.0.qualifier
 Bundle-Activator: eclipse.mcp.Activator
 Bundle-Vendor: Eclipse MCP
 Require-Bundle: org.eclipse.core.runtime,
@@ -12,6 +12,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui,
  org.eclipse.ui.console,
  org.eclipse.jface.text,
+ org.eclipse.buildship.core;resolution:=optional,
  com.google.gson
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy

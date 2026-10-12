@@ -36,6 +36,7 @@ for pattern in \
   "org.eclipse.core.runtime_*.jar" \
   "org.eclipse.core.resources_*.jar" \
   "org.eclipse.core.jobs_*.jar" \
+  "org.eclipse.buildship.core_*.jar" \
   "org.eclipse.debug.core_*.jar" \
   "org.eclipse.debug.ui_*.jar" \
   "org.eclipse.ui_3.*.jar" \

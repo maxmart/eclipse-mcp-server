@@ -32,6 +32,7 @@ That's it. Claude Code can now control your Eclipse workspace.
 | `launch` | Launch a run configuration (run or debug mode) |
 | `terminate` | Terminate running launches |
 | `refresh_project` | Refresh project(s) from filesystem |
+| `gradle_refresh` | Synchronize Gradle project(s) via Buildship (Refresh Gradle Project) |
 | `build_project` | Build project(s) |
 | `get_console_output` | Read stdout/stderr from a launch |
 | `run` | All-in-one: terminate + refresh + build + launch |
