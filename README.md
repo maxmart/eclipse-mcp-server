@@ -6,7 +6,7 @@ An Eclipse IDE plugin that lets [Claude Code](https://claude.ai/code) control yo
 
 ### 1. Download and install
 
-Download `eclipse.mcp.server_0.3.0.jar` from the [latest release](https://github.com/maxmart/eclipse-mcp-server/releases/latest) and copy it into your Eclipse `dropins/` folder:
+Download the `eclipse.mcp.server_<version>.jar` from the [latest release](https://github.com/maxmart/eclipse-mcp-server/releases/latest) and copy it into your Eclipse `dropins/` folder:
 
 ```
 <eclipse-install-dir>/eclipse/dropins/
