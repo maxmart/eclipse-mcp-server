@@ -95,7 +95,7 @@ public class GradleRefreshTool implements IMcpTool {
                     }
 
                     // No name: group all open projects by their Gradle build so each build syncs only once.
-                    // Identity-based dedup (GradleBuild does not override equals) collapses the whole monorepo
+                    // Builds are equal when they share a build configuration, which collapses the whole monorepo
                     // into a single synchronize call when every module belongs to one composite build.
                     Map<GradleBuild, List<String>> byBuild = new LinkedHashMap<>();
                     for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
@@ -136,9 +136,19 @@ public class GradleRefreshTool implements IMcpTool {
                 }
                 JsonObject error = new JsonObject();
                 error.addProperty("build", representative);
-                error.addProperty("message", status.getMessage());
+                error.addProperty("message", describe(status));
                 errors.add(error);
                 return false;
+            }
+
+            // A sync with several problems comes back as a MultiStatus whose own message is generic,
+            // so include the children — they carry the actual failures.
+            private String describe(IStatus status) {
+                StringBuilder message = new StringBuilder(String.valueOf(status.getMessage()));
+                for (IStatus child : status.getChildren()) {
+                    message.append("\n").append(describe(child));
+                }
+                return message.toString();
             }
 
             private List<String> projectsOf(GradleWorkspace workspace, GradleBuild build) {
